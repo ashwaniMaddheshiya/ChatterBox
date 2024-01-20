@@ -1,9 +1,4 @@
-import React, {
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 import axios from "axios";
 import io from "socket.io-client";
@@ -11,6 +6,7 @@ import { TextField, AppBar, Toolbar, IconButton, Box } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
 import MicIcon from "@mui/icons-material/Mic";
+import EmojiPicker from "emoji-picker-react";
 
 import UserContext from "../../context/UserContext";
 import AuthContext from "../../context/AuthContext";
@@ -21,7 +17,8 @@ let socket, chatInfoCompare;
 const ChatBody = () => {
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState([]);
-  const { chatInfo } = useContext(UserContext);
+  const [emojiPicker, setEmojiPicker] = useState(false);
+  const { chatInfo, isChatCleared } = useContext(UserContext);
   const { token, user } = useContext(AuthContext);
   const scroll = useRef();
 
@@ -76,10 +73,9 @@ const ChatBody = () => {
 
   useEffect(() => {
     fetchMessages();
-
     // chatInfoCompare = chatInfo;
     // eslint-disable-next-line
-  }, [chatInfo]);
+  }, [chatInfo, isChatCleared]);
 
   // useEffect(() => {
   //   scroll.current?.scrollIntoView({ behavior: "smooth" });
@@ -105,6 +101,10 @@ const ChatBody = () => {
     setInputText(event.target.value);
   };
 
+  const handleEmojiPicker = () => {
+    setEmojiPicker((prev) => !prev);
+  };
+
   return (
     <>
       <Box
@@ -119,6 +119,14 @@ const ChatBody = () => {
         {messages.map((message) => (
           <MessageCard message={message} key={message._id} />
         ))}
+
+        {emojiPicker && (
+          <EmojiPicker
+            onEmojiClick={(emojiData) => {
+              setInputText((prev) => prev + emojiData.emoji);
+            }}
+          />
+        )}
       </Box>
 
       <AppBar
@@ -127,11 +135,11 @@ const ChatBody = () => {
         sx={{ bgcolor: "#414143", boxShadow: "none", bottom: "0" }}
       >
         <Toolbar sx={{ justifyContent: "space-evenly" }}>
-          <IconButton color="inherit">
-            <AddIcon />
+          <IconButton color="inherit" onClick={handleEmojiPicker}>
+            <InsertEmoticonIcon />
           </IconButton>
           <IconButton color="inherit">
-            <InsertEmoticonIcon />
+            <AddIcon />
           </IconButton>
           <TextField
             variant="outlined"

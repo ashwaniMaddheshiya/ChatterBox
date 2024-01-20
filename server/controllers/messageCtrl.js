@@ -1,6 +1,7 @@
 const Message = require("../models/Message");
 const Chat = require("../models/Chat");
 const User = require("../models/User");
+const mongoose = require("mongoose");
 
 const sendMessage = async (req, res) => {
   const { content, chatId } = req.body;
@@ -48,4 +49,18 @@ const allMessages = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage, allMessages };
+const clearAllMessage = async (req, res) => {
+  const { chatId } = req.params;
+  console.log(chatId);
+  try {
+    await Message.deleteMany({
+      chat: chatId,
+    });
+    return res.status(204).json({ success: true });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ error: "Unable to clear chat, Please try again!" });
+  }
+};
+
+module.exports = { sendMessage, allMessages, clearAllMessage };

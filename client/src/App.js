@@ -1,24 +1,30 @@
-import React from "react";
+import React, { useContext } from "react";
 import axios from "axios";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import Home from "./pages/Home";
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
+import AuthContext from "./context/AuthContext";
 
-axios.defaults.baseURL = process.env.SERVER_URL;
+axios.defaults.baseURL = "http://localhost:5000";
 axios.defaults.withCredentials = true;
 
 const App = () => {
+  const { token } = useContext(AuthContext);
+
   return (
     <>
       <ToastContainer position="top-center" autoClose={2000} />
       <Routes>
-        <Route exact path="/" element={<Home />} />
-        <Route exact path="/signin" element={<SignIn />} />
-        <Route exact path="/signup" element={<SignUp />} />
+        {!token && <Route path="/" element={<Navigate to="/signin" />} />}
+
+        {token && <Route path="/" element={<Home />} />}
+
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
       </Routes>
     </>
   );

@@ -1,5 +1,3 @@
-import MessageIcon from "@mui/icons-material/Message";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Avatar from "@mui/material/Avatar";
@@ -10,20 +8,44 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { useContext, useState } from "react";
 import UserContext from "../../context/UserContext";
+import AuthContext from "../../context/AuthContext";
 import PopUpMenu from "../shared/PopUpMenu";
 import { List, ListItemButton, ListItemText } from "@mui/material";
 import Modal from "../shared/Modal";
+import axios from "axios";
+import ProfileModalContent from "../profile/ProfileModalContent";
 
 const ChatNav = () => {
-  const { selectUser } = useContext(UserContext);
+  const { token } = useContext(AuthContext);
+  const { selectUser, removeUser, chatInfo, setIsChatCleared } =
+    useContext(UserContext);
   const [modalsStack, setModalsStack] = useState([]);
+  const [modalTitle, setModalTitle] = useState("");
 
-  const openModal = (content) => {
+  const openModal = (content, title) => {
     setModalsStack((prevStack) => [...prevStack, content]);
+    setModalTitle(title);
   };
 
   const closeModal = () => {
     setModalsStack((prevStack) => prevStack.slice(0, -1));
+  };
+
+  const handleClearChat = async () => {
+    try {
+      await axios.delete(`/api/message/${chatInfo._id}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+      setIsChatCleared(true);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleCloseChat = () => {
+    removeUser();
   };
   return (
     <AppBar
@@ -52,16 +74,20 @@ const ChatNav = () => {
           </IconButton>
           <PopUpMenu>
             <List>
-              <ListItemButton onClick={() => openModal("Contact Info")}>
+              <ListItemButton
+                onClick={() =>
+                  openModal(<ProfileModalContent />, "Contact Info")
+                }
+              >
                 <ListItemText primary="Contact Info" />
               </ListItemButton>
               <ListItemButton>
                 <ListItemText primary="Select Messages" />
               </ListItemButton>
-              <ListItemButton>
+              <ListItemButton onClick={handleCloseChat}>
                 <ListItemText primary="Close Chat" />
               </ListItemButton>
-              <ListItemButton>
+              <ListItemButton onClick={handleClearChat}>
                 <ListItemText primary="Clear Chat" />
               </ListItemButton>
               <ListItemButton>
@@ -70,7 +96,7 @@ const ChatNav = () => {
             </List>
           </PopUpMenu>
           {modalsStack.length > 0 && (
-            <Modal open={true} onClose={closeModal} title="Modal Title">
+            <Modal open={true} onClose={closeModal} title={modalTitle}>
               {modalsStack[modalsStack.length - 1]}
             </Modal>
           )}

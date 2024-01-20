@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import UserContext from "./UserContext";
 
 const UserContextProvider = ({ children }) => {
@@ -8,6 +8,12 @@ const UserContextProvider = ({ children }) => {
   const [selectUser, setSelectUser] = useState(
     JSON.parse(localStorage.getItem("selectUser")) || null
   );
+  const [isChatCleared, setIsChatCleared] = useState(false);
+
+  const removeUser = () => {
+    localStorage.removeItem("selectUser");
+    setSelectUser(null);
+  };
 
   if (chatInfo) {
     localStorage.setItem("chatInfo", JSON.stringify(chatInfo));
@@ -19,7 +25,15 @@ const UserContextProvider = ({ children }) => {
 
   return (
     <UserContext.Provider
-      value={{ selectUser, setSelectUser, chatInfo, setChatInfo }}
+      value={{
+        selectUser,
+        setSelectUser,
+        chatInfo,
+        setChatInfo,
+        removeUser,
+        isChatCleared,
+        setIsChatCleared,
+      }}
     >
       {children}
     </UserContext.Provider>
