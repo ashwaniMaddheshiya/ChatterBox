@@ -1,7 +1,6 @@
 const Message = require("../models/Message");
 const Chat = require("../models/Chat");
 const User = require("../models/User");
-const mongoose = require("mongoose");
 
 const sendMessage = async (req, res) => {
   const { content, chatId } = req.body;
@@ -18,7 +17,7 @@ const sendMessage = async (req, res) => {
   };
 
   try {
-    var message = await Message.create(msgData);
+    let message = await Message.create(msgData);
 
     message = await message.populate("sender", "name pic");
     message = await message.populate("chat");
@@ -26,6 +25,24 @@ const sendMessage = async (req, res) => {
       path: "chat.users",
       select: "name pic email",
     });
+
+    const otherUserId = message.chat.users.find(
+      (userDetail) => userDetail._id.toString() !== req.user._id.toString()
+    );
+
+    const loggedInUser = await User.findById(req.user._id);
+    if (!loggedInUser.contacts.includes(otherUserId._id)) {
+      await User.findByIdAndUpdate(req.user._id, {
+        $addToSet: { contacts: otherUserId._id },
+      });
+    }
+
+    const otherUser = await User.findById(otherUserId._id);
+    if (!otherUser.contacts.includes(req.user._id)) {
+      await User.findByIdAndUpdate(otherUserId._id, {
+        $addToSet: { contacts: req.user._id },
+      });
+    }
 
     await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
 
@@ -51,7 +68,6 @@ const allMessages = async (req, res) => {
 
 const clearAllMessage = async (req, res) => {
   const { chatId } = req.params;
-  console.log(chatId);
   try {
     await Message.deleteMany({
       chat: chatId,

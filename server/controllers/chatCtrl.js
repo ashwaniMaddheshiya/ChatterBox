@@ -61,4 +61,17 @@ const fetchChats = async (req, res) => {
   }
 };
 
-module.exports = { accessChat, fetchChats };
+const deleteChat = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const user = await User.findById(req.user._id).select("contacts");
+
+    await user.updateOne({ $pull: { contacts: userId } });
+    return res.status(200).json({ message: "Contact deleted successfully" });
+  } catch (err) {
+    return res
+      .status(400)
+      .json({ error: "Unable to delete chat, Please try again" });
+  }
+};
+module.exports = { accessChat, fetchChats, deleteChat };

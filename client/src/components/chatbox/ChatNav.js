@@ -1,19 +1,26 @@
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Avatar from "@mui/material/Avatar";
-import Stack from "@mui/material/Stack";
-import IconButton from "@mui/material/IconButton";
-import SearchIcon from "@mui/icons-material/Search";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
 import { useContext, useState } from "react";
+import axios from "axios";
+
+import {
+  AppBar,
+  Toolbar,
+  Avatar,
+  Stack,
+  IconButton,
+  Typography,
+  Box,
+  List,
+  ListItemButton,
+  ListItemText,
+} from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import VideoCallIcon from "@mui/icons-material/VideoCall";
+
 import UserContext from "../../context/UserContext";
 import AuthContext from "../../context/AuthContext";
 import PopUpMenu from "../shared/PopUpMenu";
-import { List, ListItemButton, ListItemText } from "@mui/material";
 import Modal from "../shared/Modal";
-import axios from "axios";
-import ProfileModalContent from "../profile/ProfileModalContent";
+import ProfileModalContent from "../modalsContent/profile/ProfileModalContent";
 
 const ChatNav = () => {
   const { token } = useContext(AuthContext);
@@ -44,14 +51,29 @@ const ChatNav = () => {
     }
   };
 
+  const handleDeleteChat = async () => {
+    try {
+      handleClearChat();
+      await axios.delete(`/api/chat/${selectUser._id}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+      removeUser();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const handleCloseChat = () => {
     removeUser();
   };
+
   return (
     <AppBar
       position="static"
       color="transparent"
-      sx={{ bgcolor: "#414143", boxShadow: "none" }}
+      sx={{ bgcolor: "#202c33", color: "#ffffff", boxShadow: "none" }}
     >
       <Toolbar sx={{ justifyContent: "space-between" }}>
         <Box>
@@ -70,9 +92,9 @@ const ChatNav = () => {
 
         <Stack spacing={1} direction="row">
           <IconButton color="inherit">
-            <SearchIcon />
+            <VideoCallIcon />
           </IconButton>
-          <PopUpMenu>
+          <PopUpMenu icon={<MoreVertIcon fontSize="20px" />}>
             <List>
               <ListItemButton
                 onClick={() =>
@@ -90,7 +112,7 @@ const ChatNav = () => {
               <ListItemButton onClick={handleClearChat}>
                 <ListItemText primary="Clear Chat" />
               </ListItemButton>
-              <ListItemButton>
+              <ListItemButton onClick={handleDeleteChat}>
                 <ListItemText primary="Delete Chat" />
               </ListItemButton>
             </List>

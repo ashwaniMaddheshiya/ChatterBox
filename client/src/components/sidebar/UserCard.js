@@ -1,9 +1,8 @@
 import { useContext } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
-import Card from "@mui/material/Card";
-import CardHeader from "@mui/material/CardHeader";
-import Avatar from "@mui/material/Avatar";
+import { Card, CardHeader, Avatar } from "@mui/material";
 
 import UserContext from "../../context/UserContext";
 import AuthContext from "../../context/AuthContext";
@@ -22,12 +21,10 @@ const UserCard = ({ userData, onClick }) => {
       );
       setSelectUser(userData);
       setChatInfo(response.data);
-      // console.log("Response", response);
     } catch (err) {
-      console.log(err);
+      toast.error(err.response.data.error);
     }
   };
-
 
   return (
     <Card
@@ -35,13 +32,15 @@ const UserCard = ({ userData, onClick }) => {
         boxShadow: "none",
         borderBottom: "1px solid gray",
         cursor: "pointer",
+        bgcolor: "#111b21",
+        color: "#ffffff",
       }}
       onClick={chatAccess}
     >
       <CardHeader
         avatar={<Avatar alt="User Image" src="/path/to/user-image.jpg" />}
         title={userData.name}
-        subheader="Recent Message"
+        subheader=""
       />
     </Card>
   );

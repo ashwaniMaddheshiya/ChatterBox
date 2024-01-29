@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Avatar,
   Button,
   CssBaseline,
   TextField,
-  Link,
   Grid,
   Box,
   Typography,
@@ -28,16 +28,32 @@ export default function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    let response;
-    try{
-      response = await axios.post(`/api/user/signup`, {
-        name: formData.get("name"),
-        email: formData.get("email"),
-        password: formData.get("password"),
-      });
+    const name = e.currentTarget.name.value;
+    const email = e.currentTarget.email.value;
+    const password = e.currentTarget.password.value;
+
+    if (!name || !email || !password) {
+      toast.error("Email and password are required.");
+      return;
     }
-    catch(err){
+
+    // const passwordRegex =
+    //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    // if (!passwordRegex.test(password)) {
+    //   toast.error(
+    //     "Password must be at least 8 characters with at least one lowercase letter, one uppercase letter, one number, and one special character."
+    //   );
+    //   return;
+    // }
+
+    let response;
+    try {
+      response = await axios.post(`/api/user/signup`, {
+        name,
+        email,
+        password,
+      });
+    } catch (err) {
       toast.error(err.response.data.error);
     }
 
@@ -107,11 +123,12 @@ export default function SignUp() {
           >
             Sign Up
           </Button>
-          <Grid container justifyContent="flex-end">
+          <Grid container>
             <Grid item>
-              <Link href="/signin" variant="body2">
-                Already have an account? Sign in
-              </Link>
+              <Typography variant="body2">
+                Already have an account?
+                <Link to="/signin"> Sign In</Link>
+              </Typography>
             </Grid>
           </Grid>
         </Box>

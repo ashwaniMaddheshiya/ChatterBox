@@ -1,10 +1,10 @@
 import React, { useContext, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Avatar,
   Button,
   CssBaseline,
   TextField,
-  Link,
   Grid,
   Box,
   Typography,
@@ -30,12 +30,28 @@ const SignIn = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = new FormData(e.currentTarget);
+    const email = e.currentTarget.email.value;
+    const password = e.currentTarget.password.value;
+
+    if (!email || !password) {
+      toast.error("Email and password are required.");
+      return;
+    }
+
+    // const passwordRegex =
+    //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    // if (!passwordRegex.test(password)) {
+    //   toast.error(
+    //     "Password must be at least 8 characters with at least one lowercase letter, one uppercase letter, one number, and one special character."
+    //   );
+    //   return;
+    // }
+
     let response;
     try {
       response = await axios.post("/api/user/signin", {
-        email: data.get("email"),
-        password: data.get("password"),
+        email,
+        password,
       });
     } catch (err) {
       toast.error(err.response.data.error);
@@ -100,14 +116,15 @@ const SignIn = () => {
           </Button>
           <Grid container>
             <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
+              <Typography variant="body2">
+                <Link to="/signin">Forgot Password</Link>
+              </Typography>
             </Grid>
             <Grid item>
-              <Link href="/signup" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
+              <Typography variant="body2">
+                Don't have an account?
+                <Link to="/signup"> Sign Up</Link>
+              </Typography>
             </Grid>
           </Grid>
         </Box>

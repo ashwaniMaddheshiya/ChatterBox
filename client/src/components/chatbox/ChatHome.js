@@ -1,20 +1,22 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import { Box, Typography } from "@mui/material";
 
 const ChatHome = () => {
   return (
     <Box
       sx={{
-        backgroundImage: `url('/wtsp-bg.png')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
         color: "white",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
-      <Typography variant="h3">WhatsApp</Typography>
+      <Box>
+        <Typography variant="h3">Whatsapp</Typography>
+        <Typography variant="body1">
+          Select or Search an user to start a conversation!
+        </Typography>
+      </Box>
     </Box>
   );
 };

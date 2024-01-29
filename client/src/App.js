@@ -9,7 +9,7 @@ import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import AuthContext from "./context/AuthContext";
 
-axios.defaults.baseURL = "http://localhost:5000";
+axios.defaults.baseURL = process.env.SERVER_URL;
 axios.defaults.withCredentials = true;
 
 const App = () => {

@@ -20,9 +20,6 @@ const ChatBox = () => {
       <Box
         sx={{
           flexGrow: "1",
-          backgroundImage: `url('/wtsp-bg.png')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
           height: "100vh",
         }}
       >

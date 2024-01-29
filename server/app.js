@@ -32,22 +32,35 @@ const io = require("socket.io")(server, {
 
 io.on("connection", (socket) => {
   socket.on("setup", (userData) => {
-    socket.join(userData._id);
-    socket.emit("connected");
+    try {
+      socket.join(userData.userId);
+      socket.emit("connected");
+    } catch (err) {
+      return res
+        .status(400)
+        .json({ error: "Connection failed! Please reload." });
+    }
   });
 
-  socket.on("new message", (newMessageRecieved) => {
-    let chat = newMessageRecieved.chat;
-    if (!chat.users) return console.log("chat.users not defined");
+  socket.on("new-message", (newMessageReceived) => {
+    try {
+      let chat = newMessageReceived.chat;
+      if (!chat.users) throw new Error("chat.users not defined");
 
-    chat.users.forEach((user) => {
-      if (user._id == newMessageRecieved.sender._id) return;
+      chat.users.forEach((user) => {
+        if (user._id === newMessageReceived.sender._id) return;
 
-      io.to(user._id).emit("message received", newMessageRecieved);
-    });
+        console.log(`Emitting message to user ${user._id}`);
+        socket.to(user._id).emit("message-received", newMessageReceived);
+      });
+    } catch (err) {
+      return res
+        .status(400)
+        .json({ error: "Connection failed! Please reload." });
+    }
   });
 
   socket.on("disconnect", () => {
-    console.log("USER DISCONNECTED");
+    console.log("User disconnected");
   });
 });

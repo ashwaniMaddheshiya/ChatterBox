@@ -9,7 +9,9 @@ const signin = async (req, res) => {
   try {
     existingUser = await User.findOne({ email });
   } catch (err) {
-    return res.status(500).json({ error: "Error in checking user existence" });
+    return res
+      .status(500)
+      .json({ error: "Unable to verify the user, Please try again!" });
   }
 
   if (!existingUser) {
@@ -20,7 +22,9 @@ const signin = async (req, res) => {
   try {
     checkPassword = await bcryptjs.compare(password, existingUser.password);
   } catch (err) {
-    return res.status(500).json({ error: "Unable to check password" });
+    return res
+      .status(500)
+      .json({ error: "Unable to verify password, Please try again!" });
   }
 
   if (!checkPassword) {
@@ -39,14 +43,16 @@ const signin = async (req, res) => {
   });
 };
 
-const signup = async (req, res, next) => {
+const signup = async (req, res) => {
   const { name, email, password } = req.body;
 
   let existingUser;
   try {
     existingUser = await User.findOne({ email });
   } catch (err) {
-    return res.status(500).json({ error: "Error in checking user existence" });
+    return res
+      .status(500)
+      .json({ error: "Unable to verify the user, Please try again!" });
   }
 
   if (existingUser) {
@@ -81,7 +87,7 @@ const getAllUsers = async (req, res) => {
     return res.status(200).json(users);
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ error: "Unable to fetch users" });
+    return res.status(500).json({ error: "Unable to fetch users!" });
   }
 };
 
@@ -95,7 +101,47 @@ const SearchUser = async (req, res) => {
     res.status(200).json(users);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: "Unable to search, please search manually" });
+    res.status(500).json({ error: "Unable to search, Please reload!" });
+  }
+};
+
+const SearchUserForId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const searchText = req.body.searchText;
+
+    const user = await User.findById(userId);
+
+    const contactDetails = await User.find({
+      _id: { $in: user.contacts },
+    }).select("name email");
+
+    const regexPattern = new RegExp([...searchText].join(".*"), "i");
+    const filteredResult = contactDetails.filter((contact) =>
+      regexPattern.test(contact.name)
+    );
+
+    res.status(200).json(filteredResult);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Unable to search, Please reload!" });
+  }
+};
+
+const getUsersForGivenId = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findById(userId);
+
+    const contactDetails = await User.find({
+      _id: { $in: user.contacts },
+    }).select("name email");
+
+    return res.status(200).json(contactDetails);
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ error: "Something went wrong consider reloading" });
   }
 };
 
@@ -104,4 +150,6 @@ module.exports = {
   signup,
   getAllUsers,
   SearchUser,
+  getUsersForGivenId,
+  SearchUserForId,
 };

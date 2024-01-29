@@ -5,12 +5,12 @@ import { toast } from "react-toastify";
 import { Box, TextField, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-import UserList from "./UserList";
-import AuthContext from "../../context/AuthContext";
+import AuthContext from "../../../context/AuthContext";
+import UserCard from "../../sidebar/UserCard";
 
-const SearchBar = () => {
+const NewChatModalContent = ({ onClose }) => {
   const [searchText, setSearchText] = useState("");
-  const [searchResults, setSearchResults] = useState();
+  const [searchResults, setSearchResults] = useState([]);
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const { token, user } = useContext(AuthContext);
 
@@ -29,9 +29,10 @@ const SearchBar = () => {
   useEffect(() => {
     if (debouncedSearchText.trim() !== "") {
       const SearchUser = async () => {
+        let response;
         try {
-          const response = await axios.post(
-            `/api/user/search/${user.userId}`,
+          response = await axios.post(
+            `/api/user/search`,
             {
               searchText: debouncedSearchText,
             },
@@ -50,7 +51,7 @@ const SearchBar = () => {
     } else {
       setSearchResults();
     }
-  }, [debouncedSearchText, user.userId, token]);
+  }, [debouncedSearchText, token, user.userId]);
 
   return (
     <>
@@ -60,7 +61,6 @@ const SearchBar = () => {
           marginBottom: "8px",
           width: "90%",
           marginLeft: "4px",
-          bgcolor: "#202c33",
         }}
       >
         <TextField
@@ -76,15 +76,30 @@ const SearchBar = () => {
                 <SearchIcon />
               </InputAdornment>
             ),
-            style: { color: "white" },
+            style: {
+              color: "#ffffff",
+              borderColor: "#ffffff",
+            },
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#ffffff", 
+            },
+            "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+              {
+                borderColor: "#ffffff", 
+              },
           }}
         />
       </Box>
       <Box>
-        <UserList filteredUsers={searchResults} />
+        {searchResults &&
+          searchResults.map((user) => (
+            <UserCard userData={user} key={user._id} />
+          ))}
       </Box>
     </>
   );
 };
 
-export default SearchBar;
+export default NewChatModalContent;

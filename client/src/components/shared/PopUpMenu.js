@@ -1,15 +1,7 @@
 import { useState } from "react";
-import {
-  IconButton,
-  Popover,
-  List,
-  ListItem,
-  ListItemText,
-  Box,
-} from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { IconButton, Popover, Box } from "@mui/material";
 
-const MoreVertMenu = ({ children }) => {
+const PopUpMenu = ({ children, icon }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClick = (event) => {
@@ -25,7 +17,7 @@ const MoreVertMenu = ({ children }) => {
   return (
     <>
       <IconButton size="small" color="inherit" onClick={handleClick}>
-        <MoreVertIcon fontSize="20px" />
+        {icon}
       </IconButton>
 
       <Popover
@@ -47,4 +39,4 @@ const MoreVertMenu = ({ children }) => {
   );
 };
 
-export default MoreVertMenu;
+export default PopUpMenu;

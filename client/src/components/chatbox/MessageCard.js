@@ -1,5 +1,5 @@
-import Box from "@mui/material/Box";
 import { useContext } from "react";
+import Box from "@mui/material/Box";
 import AuthContext from "../../context/AuthContext";
 
 const MessageCard = ({ message }) => {

@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Avatar, Box, Typography } from "@mui/material";
-import UserContext from "../../context/UserContext";
+import UserContext from "../../../context/UserContext";
 
 const ProfileModalContent = () => {
   const { selectUser } = useContext(UserContext);
