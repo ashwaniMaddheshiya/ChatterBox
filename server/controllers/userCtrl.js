@@ -39,12 +39,13 @@ const signin = async (req, res) => {
       userId: existingUser._id,
       name: existingUser.name,
       email: existingUser.email,
+      profile: existingUser.profile,
     },
   });
 };
 
 const signup = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, profileUrl } = req.body;
 
   let existingUser;
   try {
@@ -66,8 +67,10 @@ const signup = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      profile: profileUrl || null,
     });
   } catch (err) {
+    console.log(err);
     return res.status(500).json({ error: "Unable to create user" });
   }
 
@@ -114,7 +117,7 @@ const SearchUserForId = async (req, res) => {
 
     const contactDetails = await User.find({
       _id: { $in: user.contacts },
-    }).select("name email");
+    }).select("name email profile");
 
     const regexPattern = new RegExp([...searchText].join(".*"), "i");
     const filteredResult = contactDetails.filter((contact) =>
@@ -136,7 +139,7 @@ const getUsersForGivenId = async (req, res) => {
 
     const contactDetails = await User.find({
       _id: { $in: user.contacts },
-    }).select("name email");
+    }).select("name email profile");
 
     return res.status(200).json(contactDetails);
   } catch (err) {

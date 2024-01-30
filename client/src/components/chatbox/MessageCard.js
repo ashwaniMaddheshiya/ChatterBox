@@ -16,10 +16,6 @@ const MessageCard = ({ message }) => {
             padding: "8px",
             borderRadius: "8px",
             marginBottom: "8px",
-            width: "fit-content",
-            maxWidth: "70%",
-            alignSelf:
-              message.sender._id === user.userId ? "flex-end" : "flex-start",
           }}
         >
           {message.content}

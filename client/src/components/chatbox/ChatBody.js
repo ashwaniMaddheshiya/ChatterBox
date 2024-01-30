@@ -24,6 +24,7 @@ let socket, chatInfoCompare;
 
 const ChatBody = () => {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState([]);
   const [emojiPicker, setEmojiPicker] = useState(false);
@@ -46,7 +47,7 @@ const ChatBody = () => {
   }, []);
 
   const sendMessage = async (event) => {
-    if (event.key === "Enter" && inputText.trim() !== "") {
+    if (inputText.trim() !== "") {
       let response;
       try {
         response = await axios.post(
@@ -72,15 +73,16 @@ const ChatBody = () => {
     // eslint-disable-next-line
   }, [chatInfo, isChatCleared]);
 
-  // useEffect(() => {
-  //   scroll.current?.scrollIntoView({ behavior: "smooth" });
-  // }, [messages]);
+  useEffect(() => {
+    scroll.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const fetchMessages = async () => {
     if (!chatInfo) return;
 
     let response;
     try {
+      setIsLoading(true);
       response = await axios.get(`/api/message/${chatInfo._id}`, {
         headers: {
           Authorization: token,
@@ -90,6 +92,8 @@ const ChatBody = () => {
       socket.emit("join chat", chatInfo._id);
     } catch (err) {
       toast.error(err.response.data.error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -116,9 +120,34 @@ const ChatBody = () => {
           height: "80vh",
         }}
       >
-        {messages.length > 0 ? (
+        {isLoading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
+            <Typography variant="h6" color="white">
+              Loading Your Messages...
+            </Typography>
+          </Box>
+        ) : messages.length > 0 ? (
           messages.map((message) => (
-            <MessageCard message={message} key={message._id} />
+            <Box
+              key={message._id}
+              ref={scroll}
+              sx={{
+                alignSelf:
+                  message.sender._id === user.userId
+                    ? "flex-end"
+                    : "flex-start",
+                maxWidth: "80%",
+              }}
+            >
+              <MessageCard message={message} key={message._id} />
+            </Box>
           ))
         ) : (
           <Box
@@ -176,7 +205,11 @@ const ChatBody = () => {
             size="small"
             value={inputText}
             onChange={handleInputChange}
-            onKeyDown={sendMessage}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                sendMessage();
+              }
+            }}
             InputProps={{
               style: { backgroundColor: "#3c4c57c9", color: "#ffffff" },
             }}

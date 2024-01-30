@@ -83,7 +83,7 @@ const ChatNav = () => {
             color="inherit"
             aria-label="logo"
           >
-            <Avatar alt="User Image" src="/path/to/user-image.jpg" />
+            <Avatar alt="User Image" src={selectUser.profile} />
           </IconButton>
           <Typography variant="body">
             {selectUser && selectUser.name}
@@ -102,9 +102,6 @@ const ChatNav = () => {
                 }
               >
                 <ListItemText primary="Contact Info" />
-              </ListItemButton>
-              <ListItemButton>
-                <ListItemText primary="Select Messages" />
               </ListItemButton>
               <ListItemButton onClick={handleCloseChat}>
                 <ListItemText primary="Close Chat" />

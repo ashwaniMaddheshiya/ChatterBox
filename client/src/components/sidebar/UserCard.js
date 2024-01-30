@@ -8,7 +8,7 @@ import UserContext from "../../context/UserContext";
 import AuthContext from "../../context/AuthContext";
 
 const UserCard = ({ userData, onClick }) => {
-  const { setSelectUser, setChatInfo } = useContext(UserContext);
+  const { setSelectUser, setChatInfo, selectUser } = useContext(UserContext);
   const { token } = useContext(AuthContext);
 
   const chatAccess = async () => {
@@ -32,13 +32,14 @@ const UserCard = ({ userData, onClick }) => {
         boxShadow: "none",
         borderBottom: "1px solid gray",
         cursor: "pointer",
-        bgcolor: "#111b21",
+        bgcolor:
+          selectUser && selectUser._id === userData._id ? "#5d5d5d" : "#111b21",
         color: "#ffffff",
       }}
       onClick={chatAccess}
     >
       <CardHeader
-        avatar={<Avatar alt="User Image" src="/path/to/user-image.jpg" />}
+        avatar={<Avatar alt="User Image" src={userData.profile} />}
         title={userData.name}
         subheader=""
       />

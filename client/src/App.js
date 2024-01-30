@@ -9,7 +9,7 @@ import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import AuthContext from "./context/AuthContext";
 
-axios.defaults.baseURL = process.env.SERVER_URL;
+axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
 axios.defaults.withCredentials = true;
 
 const App = () => {
@@ -17,12 +17,10 @@ const App = () => {
 
   return (
     <>
-      <ToastContainer position="top-center" autoClose={2000} />
+      <ToastContainer position="top-right" autoClose={2000} />
       <Routes>
         {!token && <Route path="/" element={<Navigate to="/signin" />} />}
-
         {token && <Route path="/" element={<Home />} />}
-
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
       </Routes>

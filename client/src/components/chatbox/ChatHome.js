@@ -12,9 +12,13 @@ const ChatHome = () => {
       }}
     >
       <Box>
-        <Typography variant="h3">Whatsapp</Typography>
+        <Typography variant="h3">ChatterBox</Typography>
         <Typography variant="body1">
           Select or Search an user to start a conversation!
+        </Typography>
+        <Typography variant="body2" mt={2} fontWeight={700}>
+          Didn't find any user? Search "Admin" in New Chat (icon next to your
+          profile)
         </Typography>
       </Box>
     </Box>

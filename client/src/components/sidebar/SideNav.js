@@ -12,7 +12,8 @@ import NewChatModalContent from "../modalsContent/newChat/NewChatModalContent";
 const SideNav = () => {
   const [modalsStack, setModalsStack] = useState([]);
   const [modalTitle, setModalTitle] = useState("Settings");
-  const { logout } = useContext(AuthContext);
+  const { logout,user } = useContext(AuthContext);
+
   const navigate = useNavigate();
 
   const openModal = (content, title) => {
@@ -41,7 +42,7 @@ const SideNav = () => {
     >
       <Toolbar sx={{ justifyContent: "space-between" }}>
         <IconButton size="large" edge="start" color="inherit" aria-label="logo">
-          <Avatar alt="User Image" src="/path/to/user-image.jpg" />
+          <Avatar alt="User Image" src={user.profile} />
         </IconButton>
 
         <Stack spacing={1} direction="row">

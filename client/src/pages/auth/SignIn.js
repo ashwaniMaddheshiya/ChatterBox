@@ -9,8 +9,6 @@ import {
   Box,
   Typography,
   Container,
-  FormControlLabel,
-  Checkbox,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import axios from "axios";
@@ -38,14 +36,14 @@ const SignIn = () => {
       return;
     }
 
-    // const passwordRegex =
-    //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    // if (!passwordRegex.test(password)) {
-    //   toast.error(
-    //     "Password must be at least 8 characters with at least one lowercase letter, one uppercase letter, one number, and one special character."
-    //   );
-    //   return;
-    // }
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      toast.error(
+        "Password must be at least 8 characters with at least one lowercase letter, one uppercase letter, one number, and one special character."
+      );
+      return;
+    }
 
     let response;
     try {
@@ -101,10 +99,6 @@ const SignIn = () => {
             type="password"
             id="password"
             autoComplete="current-password"
-          />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
           />
           <Button
             type="submit"
