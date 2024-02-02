@@ -3,6 +3,9 @@ import axios from "axios";
 import io from "socket.io-client";
 import EmojiPicker from "emoji-picker-react";
 import { toast } from "react-toastify";
+import { storage } from "../../config/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { v4 } from "uuid";
 
 import {
   TextField,
@@ -19,6 +22,7 @@ import SendIcon from "@mui/icons-material/Send";
 import UserContext from "../../context/UserContext";
 import AuthContext from "../../context/AuthContext";
 import MessageCard from "./MessageCard";
+import SendFileUi from "./SendFileUi";
 
 let socket, chatInfoCompare;
 
@@ -46,21 +50,57 @@ const ChatBody = () => {
     });
   }, []);
 
-  const sendMessage = async (event) => {
-    if (inputText.trim() !== "") {
+  const handleFileChange = async (event) => {
+    setSelectedFile(event.target.files[0]);
+    // await uploadFile();
+  };
+
+  const handleInputChange = (event) => {
+    setInputText(event.target.value);
+  };
+
+  const handleEmojiPicker = () => {
+    setEmojiPicker((prev) => !prev);
+  };
+
+  const uploadFile = async () => {
+    if (selectedFile == null) return null;
+    const selecteFileRef = ref(storage, `files/${selectedFile.name + v4()}`);
+    await uploadBytes(selecteFileRef, selectedFile);
+
+    const selectedFileUrl = await getDownloadURL(selecteFileRef);
+    setInputText(selectedFileUrl);
+  };
+
+  const sendMessage = async () => {
+    await uploadFile();
+    if (inputText.trim() !== "" || selectedFile !== null) {
       let response;
       try {
-        response = await axios.post(
-          "/api/message",
-          {
-            chatId: chatInfo._id,
-            content: inputText,
-          },
-          { headers: { Authorization: token } }
-        );
+        if (selectedFile !== null) {
+          response = await axios.post(
+            "/api/message",
+            {
+              chatId: chatInfo._id,
+              content: inputText,
+              messageType: "file",
+            },
+            { headers: { Authorization: token } }
+          );
+        } else {
+          response = await axios.post(
+            "/api/message",
+            {
+              chatId: chatInfo._id,
+              content: inputText,
+            },
+            { headers: { Authorization: token } }
+          );
+        }
         socket.emit("new-message", response.data);
         setMessages((prevMessages) => [...prevMessages, response.data]);
         setInputText("");
+        setSelectedFile(null);
       } catch (err) {
         toast.error(err.response.data.error);
       }
@@ -97,128 +137,122 @@ const ChatBody = () => {
     }
   };
 
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
-  };
-
-  const handleInputChange = (event) => {
-    setInputText(event.target.value);
-  };
-
-  const handleEmojiPicker = () => {
-    setEmojiPicker((prev) => !prev);
-  };
-
   return (
     <>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          margin: "4px",
-          overflowY: "auto",
-          height: "80vh",
-        }}
-      >
-        {isLoading ? (
+      {selectedFile ? (
+        <SendFileUi fileName={selectedFile.name} sendFile={sendMessage} />
+      ) : (
+        <>
           <Box
             sx={{
               display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
+              flexDirection: "column",
+              margin: "4px",
+              overflowY: "auto",
+              height: "80vh",
             }}
           >
-            <Typography variant="h6" color="white">
-              Loading Your Messages...
-            </Typography>
+            {isLoading ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                }}
+              >
+                <Typography variant="h6" color="white">
+                  Loading Your Messages...
+                </Typography>
+              </Box>
+            ) : messages.length > 0 ? (
+              messages.map((message) => (
+                <Box
+                  key={message._id}
+                  ref={scroll}
+                  sx={{
+                    alignSelf:
+                      message.sender._id === user.userId
+                        ? "flex-end"
+                        : "flex-start",
+                    maxWidth: "80%",
+                  }}
+                >
+                  <MessageCard message={message} key={message._id} />
+                </Box>
+              ))
+            ) : (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                }}
+              >
+                <Typography variant="body1" color="white">
+                  Send a "Hi👋" to start a conversation
+                </Typography>
+              </Box>
+            )}
+
+            {emojiPicker && (
+              <EmojiPicker
+                onEmojiClick={(emojiData) => {
+                  setInputText((prev) => prev + emojiData.emoji);
+                }}
+              />
+            )}
           </Box>
-        ) : messages.length > 0 ? (
-          messages.map((message) => (
-            <Box
-              key={message._id}
-              ref={scroll}
-              sx={{
-                alignSelf:
-                  message.sender._id === user.userId
-                    ? "flex-end"
-                    : "flex-start",
-                maxWidth: "80%",
-              }}
-            >
-              <MessageCard message={message} key={message._id} />
-            </Box>
-          ))
-        ) : (
-          <Box
+
+          <AppBar
+            position="static"
+            color="transparent"
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
+              bgcolor: "#27353c",
+              color: "#ffffff",
+              boxShadow: "none",
+              bottom: "0",
             }}
           >
-            <Typography variant="body1" color="white">
-              Send a "Hi👋" to start a conversation
-            </Typography>
-          </Box>
-        )}
+            <Toolbar sx={{ justifyContent: "space-evenly" }}>
+              <IconButton color="inherit" onClick={handleEmojiPicker}>
+                <InsertEmoticonIcon />
+              </IconButton>
+              <label htmlFor="file-input">
+                <IconButton color="inherit" component="span">
+                  <AddIcon />
+                </IconButton>
+                <input
+                  id="file-input"
+                  type="file"
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
+              </label>
 
-        {emojiPicker && (
-          <EmojiPicker
-            onEmojiClick={(emojiData) => {
-              setInputText((prev) => prev + emojiData.emoji);
-            }}
-          />
-        )}
-      </Box>
-
-      <AppBar
-        position="static"
-        color="transparent"
-        sx={{
-          bgcolor: "#27353c",
-          color: "#ffffff",
-          boxShadow: "none",
-          bottom: "0",
-        }}
-      >
-        <Toolbar sx={{ justifyContent: "space-evenly" }}>
-          <IconButton color="inherit" onClick={handleEmojiPicker}>
-            <InsertEmoticonIcon />
-          </IconButton>
-          <label htmlFor="file-input">
-            <IconButton color="inherit" component="span">
-              <AddIcon />
-            </IconButton>
-            <input
-              id="file-input"
-              type="file"
-              style={{ display: "none" }}
-              onChange={handleFileChange}
-            />
-          </label>
-
-          <TextField
-            variant="outlined"
-            sx={{ width: "90%" }}
-            size="small"
-            value={inputText}
-            onChange={handleInputChange}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                sendMessage();
-              }
-            }}
-            InputProps={{
-              style: { backgroundColor: "#3c4c57c9", color: "#ffffff" },
-            }}
-          />
-          <IconButton color="inherit" onClick={sendMessage}>
-            <SendIcon />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
+              <TextField
+                variant="outlined"
+                sx={{ width: "90%" }}
+                size="small"
+                value={inputText}
+                onChange={handleInputChange}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    sendMessage();
+                  }
+                }}
+                InputProps={{
+                  style: { backgroundColor: "#3c4c57c9", color: "#ffffff" },
+                }}
+              />
+              <IconButton color="inherit" onClick={sendMessage}>
+                <SendIcon />
+              </IconButton>
+            </Toolbar>
+          </AppBar>
+        </>
+      )}
     </>
   );
 };

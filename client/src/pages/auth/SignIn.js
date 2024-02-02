@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Avatar,
@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 const SignIn = () => {
   const navigate = useNavigate();
   const { login, token } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -47,12 +48,16 @@ const SignIn = () => {
 
     let response;
     try {
+      setIsLoading(true);
       response = await axios.post("/api/user/signin", {
         email,
         password,
       });
     } catch (err) {
-      toast.error(err.response.data.error);
+      console.log(err);
+      // toast.error(err.response.data.error);
+    } finally {
+      setIsLoading(false);
     }
 
     if (response) {
@@ -105,8 +110,9 @@ const SignIn = () => {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            disabled={isLoading}
           >
-            Sign In
+            {isLoading ? "Signing In..." : "Sign In"}
           </Button>
           <Grid container>
             <Grid item xs>

@@ -23,6 +23,7 @@ export default function SignUp() {
   const navigate = useNavigate();
   const { token } = React.useContext(AuthContext);
   const [profilePic, setProfilePic] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -67,6 +68,7 @@ export default function SignUp() {
     const profileUrl = await uploadPic();
     let response;
     try {
+      setIsLoading(true);
       response = await axios.post(`/api/user/signup`, {
         name,
         email,
@@ -75,6 +77,8 @@ export default function SignUp() {
       });
     } catch (err) {
       toast.error(err.response.data.error);
+    } finally {
+      setIsLoading(false);
     }
 
     if (response) {
@@ -167,8 +171,9 @@ export default function SignUp() {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            disabled={isLoading}
           >
-            Sign Up
+            {isLoading ? "Signing up..." : "Sign Up"}
           </Button>
           <Grid container>
             <Grid item>
