@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import UserContext from "./UserContext";
 
 const UserContextProvider = ({ children }) => {
+  const [notification, setNotification] = useState({});
   const [chatInfo, setChatInfo] = useState(
     JSON.parse(localStorage.getItem("chatInfo")) || null
   );
@@ -33,6 +34,8 @@ const UserContextProvider = ({ children }) => {
         removeUser,
         isChatCleared,
         setIsChatCleared,
+        notification,
+        setNotification,
       }}
     >
       {children}

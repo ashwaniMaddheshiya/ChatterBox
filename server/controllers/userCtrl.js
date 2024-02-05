@@ -98,6 +98,7 @@ const SearchUser = async (req, res) => {
   try {
     const searchText = req.body.searchText;
     const users = await User.find({
+      _id: { $ne: req.user._id },
       name: { $regex: new RegExp([...searchText].join(".*"), "i") },
     });
 

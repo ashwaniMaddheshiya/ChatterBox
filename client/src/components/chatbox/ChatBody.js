@@ -24,7 +24,7 @@ import AuthContext from "../../context/AuthContext";
 import MessageCard from "./MessageCard";
 import SendFileUi from "./SendFileUi";
 
-let socket, chatInfoCompare;
+let socket;
 
 const ChatBody = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -32,12 +32,13 @@ const ChatBody = () => {
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState([]);
   const [emojiPicker, setEmojiPicker] = useState(false);
-  const { chatInfo, isChatCleared } = useContext(UserContext);
+  const { chatInfo, isChatCleared, selectUser, setNotification } =
+    useContext(UserContext);
   const { token, user } = useContext(AuthContext);
   const scroll = useRef();
 
   useEffect(() => {
-    socket = io("http://localhost:5000");
+    socket = io(process.env.REACT_APP_SERVER_URL);
     socket.emit("setup", user);
     socket.on("connected", () => {
       console.log("Socket connected");
@@ -45,14 +46,25 @@ const ChatBody = () => {
   }, [user]);
 
   useEffect(() => {
-    socket.on("message-received", (newMessageRecieved) => {
-      setMessages((prevMessages) => [...prevMessages, newMessageRecieved]);
-    });
-  }, []);
+    socket.on("message-received", handleNewMessageReceived);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectUser]);
+
+  const handleNewMessageReceived = (newMessageReceived) => {
+    if (newMessageReceived.sender._id !== selectUser._id) {
+      setNotification((prevNotifications) => ({
+        ...prevNotifications,
+        [newMessageReceived.sender._id]:
+          (prevNotifications[newMessageReceived.sender._id] || 0) + 1,
+      }));
+    } else {
+      setMessages((prevMessages) => [...prevMessages, newMessageReceived]);
+    }
+  };
 
   const handleFileChange = async (event) => {
     setSelectedFile(event.target.files[0]);
-    // await uploadFile();
   };
 
   const handleInputChange = (event) => {
@@ -74,42 +86,29 @@ const ChatBody = () => {
 
   const sendMessage = async () => {
     await uploadFile();
-    if (inputText.trim() !== "" || selectedFile !== null) {
-      let response;
-      try {
-        if (selectedFile !== null) {
-          response = await axios.post(
-            "/api/message",
-            {
-              chatId: chatInfo._id,
-              content: inputText,
-              messageType: "file",
-            },
-            { headers: { Authorization: token } }
-          );
-        } else {
-          response = await axios.post(
-            "/api/message",
-            {
-              chatId: chatInfo._id,
-              content: inputText,
-            },
-            { headers: { Authorization: token } }
-          );
-        }
-        socket.emit("new-message", response.data);
-        setMessages((prevMessages) => [...prevMessages, response.data]);
-        setInputText("");
-        setSelectedFile(null);
-      } catch (err) {
-        toast.error(err.response.data.error);
-      }
+    if (!inputText.trim() && !selectedFile) return;
+    try {
+      const response = await axios.post(
+        "/api/message",
+        {
+          chatId: chatInfo._id,
+          content: inputText,
+          messageType: selectedFile ? "file" : "text",
+        },
+        { headers: { Authorization: token } }
+      );
+
+      socket.emit("new-message", response.data);
+      setMessages((prevMessages) => [...prevMessages, response.data]);
+      setInputText("");
+      setSelectedFile(null);
+    } catch (err) {
+      toast.error(err.response.data.error);
     }
   };
 
   useEffect(() => {
     fetchMessages();
-    chatInfoCompare = chatInfo;
     // eslint-disable-next-line
   }, [chatInfo, isChatCleared]);
 
