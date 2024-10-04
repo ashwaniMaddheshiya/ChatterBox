@@ -73,7 +73,7 @@ const SearchBar = () => {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon />
+                <SearchIcon sx={{ color: "white" }} />
               </InputAdornment>
             ),
             style: { color: "white" },

@@ -73,7 +73,7 @@ const NewChatModalContent = ({ onClose }) => {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon />
+                <SearchIcon sx={{ color: "white" }} />
               </InputAdornment>
             ),
             style: {
@@ -83,11 +83,11 @@ const NewChatModalContent = ({ onClose }) => {
           }}
           sx={{
             "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#ffffff", 
+              borderColor: "#ffffff",
             },
             "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
               {
-                borderColor: "#ffffff", 
+                borderColor: "#ffffff",
               },
           }}
         />

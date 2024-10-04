@@ -55,7 +55,7 @@ const SignIn = () => {
       });
     } catch (err) {
       console.log(err);
-      // toast.error(err.response.data.error);
+      toast.error(err.response.data.error);
     } finally {
       setIsLoading(false);
     }

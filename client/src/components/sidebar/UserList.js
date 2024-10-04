@@ -68,7 +68,7 @@ const UserList = ({ filteredUsers }) => {
               justifyContent: "center",
             }}
           >
-            <Typography variant="body1" sx={{ fontWeight: "700" }}>
+            <Typography variant="body1" sx={{ fontWeight: "700", color:'white' }}>
               No Result
             </Typography>
           </Box>
